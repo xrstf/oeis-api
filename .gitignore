@@ -1,0 +1,4 @@
+composer.lock
+resources/config.json
+vendor/
+data/

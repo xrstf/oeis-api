@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>REST API for The On-Line Encyclopedia of Integer Sequences (OEIS)</title>
+	<style type="text/css">
+	.container {
+		max-width: 960px;
+		margin: 0 auto;
+		font-family: sans-serif;
+	}
+
+	p {
+		text-align: justify;
+	}
+
+	pre {
+		padding: 10px;
+		background: #ddd;
+	}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>REST API for The On-Line Encyclopedia of Integer Sequences</h1>
+
+<p>
+	This site provides a simple, JSON-based API to access the integer sequences of the
+	<a href="https://oeis.org/" target="_blank">The On-Line Encyclopedia of Integer
+	Sequences</a> (OEIS). Data is fetched on-demand and converted from the
+	<a href="https://oeis.org/eishelp1.html" target="_blank">internal text format</a> into neatly
+	formatted JSON. Only read-access is available.
+</p>
+
+<p>
+	All data is copyright The On-Line Encyclopedia of Integer Sequences and made available under the
+	<a href="http://oeis.org/wiki/The_OEIS_End-User_License_Agreement" target="_blank">The OEIS
+	End-User License Agreement</a>.
+</p>
+
+<ul>
+	<li><a href="#basics">API Basics</a></li>
+	<li><a href="#structure">JSON Structure</a></li>
+	<li><a href="#search"><code>GET /sequences</code> &ndash; search for sequences</a></li>
+	<li><a href="#single"><code>GET /sequences/{id}</code> &ndash; retrieve single sequence</a></li>
+</ul>
+
+<p style="background:#fee;padding:10px">
+	Please keep in mind that all of your requests are proxied to the OEIS website in case of cache-misses
+	in the API and that searches can put a lot of strain on their side. <strong>Don't be a dick,
+	be reasonable.</strong> To prevent hammering the OEIS, IPs are limited to 20 requests per minute.
+</p>
+
+<!--
+<p style="background:#efe;padding:10px">
+	The code for this API is <a href="https://github.com/xrstf/oeis-api">available on GitHub</a>,
+	so you can roll your own if you need to perform more requests.
+</p>
+-->
+
+<h2 id="basics">API Basics</h2>
+
+<p>
+	The API is HTTP-based, unauthenticated and responds with JSON. HTTP status codes are used as
+	described in <abbr title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">RFC&nbsp;7231</abbr>.
+</p>
+
+<p>A request like this</p>
+
+<pre>GET /sequences/A000045 HTTP/1.1
+Host: oeis.xrstf.de</pre>
+
+<p>will result in a response like this:</p>
+
+<pre>HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{"data":&lt;snip&gt;}</pre>
+
+<p>Try out <a href="/sequences/A000045">this example</a> if you like.</p>
+
+<h2 id="structure">JSON Structure</h2>
+
+<p>A single sequence represented as JSON looks like this:</p>
+
+<pre>{
+  (TODO, see samples below)
+}</pre>
+
+<h2 id="search"><code>GET /sequences</code> <small>&ndash; search for sequences</small></h2>
+
+<p>
+	To search for sequences, perform a <code>GET /sequences</code> request and add your desired
+	query string parameters. Available paramaters are listed below.
+</p>
+
+<p>
+	Note that results are limited to 10 sequences per page. The query string can be used to navigate
+	through the pages; additionally, the JSON response will contain links to the next/previous pages.
+</p>
+
+<table>
+	<thead>
+		<tr>
+			<th>Parameter&nbsp;Name</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td><code>search</code>&nbsp;(<strong>mandatory</strong>)</td>
+			<td>
+				search term, for example sample sequences (<code>7,13,19,23,31,79,97</code> &ndash; do
+				not use spaces) or names (<code>fibonacci</code>).
+			</td>
+		</tr>
+		<tr>
+			<td><code>sort</code></td>
+			<td>
+				sorting order, can be one of [<code>relevance</code> (default), <code>references</code>,
+				<code>number</code>, <code>modified</code>, <code>created</code>]
+			</td>
+		</tr>
+		<tr>
+			<td><code>page</code></td>
+			<td>
+				page number; first page is page 1
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>Examples</h3>
+
+<ul>
+	<li><a href="/sequences?search=star%20wars">GET /sequences?search=star%20wars</a></li>
+	<li><a href="/sequences?search=1,5,4,3,2,8,5,4,3,2,8,5,4,3,4,2&amp;sort=references">GET /sequences?search=1,5,4,3,2,8,5,4,3,2,8,5,4,3,4,2&amp;sort=references</a></li>
+</ul>
+
+<h3>Response</h3>
+
+<p>The response will contain a (possibly empty) list of sequences.</p>
+
+<pre>{
+  &quot;data&quot;: [
+    &lt;sequence&gt;,
+    &lt;sequence&gt;,
+    &lt;sequence&gt;,
+    ...
+  ],
+  &quot;pagination&quot;: {
+    &quot;page&quot;: 1,
+    &quot;pages&quot;: 23,
+    &quot;prev&quot;: null,
+    &quot;next&quot;: &quot;http://oeis.xrstf.de/sequences?search=star%20wars&amp;page=2&quot;
+  }
+}</pre>
+
+<h2 id="single"><code>GET /sequences/{sequence ID}</code> <small>&ndash; retrieve a specific sequence</small></h2>
+
+<p>
+	This will return a sequence based on its ID (for example, <code>A004125</code>). If the sequence
+	could not be found, HTTP 404 (Not Found) will be returned.
+</p>
+
+<h3>Examples</h3>
+
+<ul>
+	<li><a href="/sequences/A004125">GET /sequences/A004125</a></li>
+</ul>
+
+<h3>Response</h3>
+
+<p>The response will contain single sequence.</p>
+
+<pre>{
+  &quot;data&quot;: &lt;sequence&gt;
+}</pre>
+		<hr>
+
+		<footer style="text-align:center"><small>
+			Hacked together by <a href="https://xrstf.de">Christoph Mewes</a> in 2015.<br>
+			“The On-Line Encyclopedia of Integer Sequences” is a registered trademark of the <a href="http://oeisf.org" target="_blank">The OEIS Foundation Inc.</a>.
+		</small></footer>
+	</div>
+</body>
+</html>

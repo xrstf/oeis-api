@@ -1,0 +1,15 @@
+{
+    "name": "xrstf/oeis-api",
+    "type": "application",
+    "description": "REST API proxy for oesie.org, returning parsed sequences as JSON",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4.0",
+        "silex/silex": "~1.2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "xrstf\\oeisApi\\": "src/xrstf/oeisApi"
+        }
+    }
+}

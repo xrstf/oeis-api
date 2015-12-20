@@ -1,0 +1,10 @@
+{
+  "debug": true,
+  "database": {
+    "host": "localhost",
+    "username": "develop",
+    "password": "develop",
+    "database": "oeis",
+    "port": 3306
+  }
+}
